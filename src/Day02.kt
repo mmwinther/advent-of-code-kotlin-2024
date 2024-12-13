@@ -1,6 +1,6 @@
 import kotlin.math.abs
 
-const val DAY_NUMBER = "02"
+private const val DAY_NUMBER = "02"
 
 fun main() {
     fun String.parseReport(): List<Int> =
