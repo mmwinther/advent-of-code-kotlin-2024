@@ -33,17 +33,30 @@ class Rule(
     }
 }
 
+fun extractRules(input: List<String>): List<Rule> =
+    input
+        .subList(0, input.indexOfFirst { it == "" })
+        .map { Rule.fromLine(it) }
+
+fun extractUpdates(input: List<String>): List<List<Int>> =
+    input
+        .subList(input.indexOfFirst { it == "" } + 1, input.size)
+        .map { update -> update.split(",").map { it.toInt() } }
+
+fun fixUpdate(
+    update: List<Int>,
+    rules: List<Rule>,
+): List<Int> =
+    update.sortedWith {
+        leftPage,
+        rightPage,
+        ->
+        rules
+            .first { leftPage in it && rightPage in it }
+            .compare(leftPage, rightPage)
+    }
+
 fun main() {
-    fun extractRules(input: List<String>): List<Rule> =
-        input
-            .subList(0, input.indexOfFirst { it == "" })
-            .map { Rule.fromLine(it) }
-
-    fun extractUpdates(input: List<String>): List<List<Int>> =
-        input
-            .subList(input.indexOfFirst { it == "" } + 1, input.size)
-            .map { update -> update.split(",").map { it.toInt() } }
-
     fun part1(input: List<String>): Int {
         val rules = extractRules(input)
         return extractUpdates(input)
@@ -55,19 +68,6 @@ fun main() {
                     }
             }.sumOf { it[it.size / 2] }
     }
-
-    fun fixUpdate(
-        update: List<Int>,
-        rules: List<Rule>,
-    ): List<Int> =
-        update.sortedWith {
-            leftPage,
-            rightPage,
-            ->
-            rules
-                .first { leftPage in it && rightPage in it }
-                .compare(leftPage, rightPage)
-        }
 
     fun part2(input: List<String>): Int {
         val rules = extractRules(input)
