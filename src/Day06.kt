@@ -9,13 +9,12 @@ enum class Direction(
     LEFT(-1 to 0),
 }
 
-fun turn(direction: Direction) =
-    when (direction) {
-        Direction.UP -> Direction.RIGHT
-        Direction.RIGHT -> Direction.DOWN
-        Direction.DOWN -> Direction.LEFT
-        Direction.LEFT -> Direction.UP
-    }
+data class Position(
+    val x: Int,
+    val y: Int,
+) {
+    fun stepForward(direction: Direction): Position = Position(this.x + direction.increment.first, this.y + direction.increment.second)
+}
 
 fun main() {
     val start = '^'
@@ -23,10 +22,24 @@ fun main() {
     val obstacle = '#'
     val visited = "X"
 
-    fun findInitialPosition(input: List<String>): MutableList<Int> =
-        mutableListOf(input.first { it.contains(start) }.indexOfFirst { it == start }, input.indexOfFirst { it.contains(start) })
+    fun turn(direction: Direction) =
+        when (direction) {
+            Direction.UP -> Direction.RIGHT
+            Direction.RIGHT -> Direction.DOWN
+            Direction.DOWN -> Direction.LEFT
+            Direction.LEFT -> Direction.UP
+        }
 
-    operator fun List<String>.contains(element: MutableList<Int>): Boolean = element[0] in this.indices && element[1] in this[0].indices
+    fun findInitialPosition(input: List<String>): Position =
+        input
+            .zip(input.indices)
+            .first { valueIndexPair ->
+                valueIndexPair.first.contains(start)
+            }.let { valueIndexPair ->
+                Position(valueIndexPair.first.indexOfFirst { it == start }, valueIndexPair.second)
+            }
+
+    operator fun List<String>.contains(position: Position): Boolean = position.y in this.indices && position.x in this[0].indices
 
     fun part1(input: List<String>): Int {
         val map = input.toMutableList()
@@ -36,18 +49,18 @@ fun main() {
         var numVisited = 1
         while (nextPosition in map) {
 //            println("$direction $position ${map[position[1]][position[0]]} $nextPosition ${map[nextPosition[1]][nextPosition[0]]}")
-            if (map[nextPosition[1]][nextPosition[0]] == obstacle) {
+            if (map[nextPosition.y][nextPosition.x] == obstacle) {
                 direction = turn(direction)
-                nextPosition = mutableListOf(position[0] + direction.increment.first, position[1] + direction.increment.second)
+                nextPosition = position.stepForward(direction)
                 println("Turn to $direction")
             }
-            if (map[position[1]][position[0]] in listOf(empty, start)) {
+            if (map[position.y][position.x] in listOf(empty, start)) {
                 numVisited++
-                map[position[1]] = map[position[1]].replaceRange(position[0], position[0] + 1, visited)
+                map[position.y] = map[position.y].replaceRange(position.x, position.x + 1, visited)
                 println("Visited $position")
             }
             position = nextPosition
-            nextPosition = mutableListOf(position[0] + direction.increment.first, position[1] + direction.increment.second)
+            nextPosition = position.stepForward(direction)
         }
         return numVisited
     }
